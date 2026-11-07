@@ -1,23 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grimoire/core/library_controller.dart';
-import 'package:grimoire/core/library_store.dart';
 import 'package:grimoire/core/model.dart';
 import 'package:grimoire/ui/book_screen.dart';
 import 'package:grimoire/ui/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'test_helpers.dart';
-
-/// Stockage en mémoire : pas d'écriture disque pendant les tests de widgets.
-class MemoryStore extends LibraryStore {
-  int saves = 0;
-  MemoryStore() : super(Directory.systemTemp);
-  @override
-  Future<void> save(Library lib) async => saves++;
-}
 
 LibraryController controller() {
   final lib = Library()
