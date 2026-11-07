@@ -150,13 +150,14 @@ void main() {
     lib.books[local.id] = local;
     lib.lastImportAt = DateTime.utc(2026, 1, 1);
     applyExport(lib, loadExport(), t1);
-    final princes = lib.books.values.where((b) => normalize(b.title) == 'le prince cruel').toList();
+    final princes = lib.visible.where((b) => normalize(b.title) == 'le prince cruel').toList();
     expect(princes.length, 1);
     expect(princes.single.id, 'bn:01234567');
     expect(princes.single.booknodeId, '01234567');
     expect(princes.single.status, ReadStatus.reading);
     expect(princes.single.summary, startsWith('Jude'));
-    expect(lib.books.containsKey('local:x'), isFalse);
+    expect(lib.books['local:x']!.deleted, isTrue, reason: 'pierre tombale pour la synchro');
+    expect(lib.books['local:x']!.updatedAt['deleted'], t1);
   });
 
   test('deleted book is not resurrected', () {

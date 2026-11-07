@@ -51,6 +51,7 @@ ImportReport applyExport(Library lib, Map<String, dynamic> export, DateTime now)
       final na = authors.isEmpty ? '' : normalize(authors.first);
       for (final candidate in lib.books.values) {
         if (candidate.booknodeId == null &&
+            !candidate.deleted &&
             normalize(candidate.title) == nt &&
             (candidate.authors.isEmpty ? '' : normalize(candidate.authors.first)) == na) {
           b = candidate;
@@ -58,7 +59,11 @@ ImportReport applyExport(Library lib, Map<String, dynamic> export, DateTime now)
         }
       }
       if (b != null) {
-        lib.books.remove(b.id);
+        // Pierre tombale à l'ancien identifiant : un téléphone qui a encore
+        // ce livre sous `local:` ne le fera pas réapparaître à la synchro.
+        lib.books[b.id] = b.copy()
+          ..deleted = true
+          ..updatedAt['deleted'] = now;
         b.id = 'bn:$bnId';
         lib.books[b.id] = b;
       }
