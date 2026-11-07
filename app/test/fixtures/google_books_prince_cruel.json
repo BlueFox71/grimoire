@@ -1,0 +1,31 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 2,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "abc123",
+      "volumeInfo": {
+        "title": "Le Peuple de l'air",
+        "subtitle": "Le Prince cruel",
+        "authors": ["Holly Black"],
+        "publisher": "Rageot",
+        "publishedDate": "2019-01-09",
+        "description": "Jude avait sept ans quand ses parents furent assassinés.",
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=abc123&printsec=frontcover&img=1&zoom=5",
+          "thumbnail": "http://books.google.com/books/content?id=abc123&printsec=frontcover&img=1&zoom=1"
+        },
+        "language": "fr"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "def456",
+      "volumeInfo": {
+        "title": "Le Prince cruel",
+        "language": "fr"
+      }
+    }
+  ]
+}
