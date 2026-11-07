@@ -41,7 +41,6 @@ dependencies:
   mobile_scanner: ^7.5.0
   qr_flutter: ^4.1.0
   file_selector: ^1.1.0
-  google_fonts: ^9.0.0
   shared_preferences: ^2.5.6
 
 dev_dependencies:
@@ -65,6 +64,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: Cormorant Garamond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond.ttf
+    - family: Nunito Sans
+      fonts:
+        - asset: assets/fonts/NunitoSans.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
