@@ -1,0 +1,57 @@
+{
+  "format": "grimoire-booknode-export",
+  "version": 1,
+  "exportedAt": "2026-11-07T21:00:00Z",
+  "user": "Subarashi",
+  "complete": true,
+  "books": [
+    {
+      "booknodeId": "03477053",
+      "url": "https://booknode.com/fourth_wing_03477053",
+      "title": "Fourth Wing",
+      "authors": ["Rebecca Yarros"],
+      "type": "livre",
+      "list": "pal",
+      "addedAt": "2024-01-15",
+      "details": {
+        "coverUrl": "https://cdn1.booknode.com/book_cover/5806/full/fourth-wing-5805999.jpg",
+        "summary": "Rien ne prédestinait Violet Sorrengail à être une cavalière.",
+        "series": "The Empyrean",
+        "volume": 1,
+        "themes": [
+          {"name": "Dragons", "up": 171, "down": 1},
+          {"name": "Romantasy", "up": 144, "down": 3},
+          {"name": "Young Adult", "up": 27, "down": 16}
+        ],
+        "tropes": [{"name": "Ennemis à amants (Enemies to lovers)", "up": 41, "down": 6}]
+      }
+    },
+    {
+      "booknodeId": "01234567",
+      "url": "https://booknode.com/le_prince_cruel_01234567",
+      "title": "Le Prince Cruel",
+      "authors": ["Holly Black"],
+      "type": "livre",
+      "list": "or",
+      "addedAt": "2022-03-02",
+      "details": {
+        "coverUrl": "https://cdn1.booknode.com/book_cover/1/full/le-prince-cruel.jpg",
+        "summary": "Jude avait sept ans quand ses parents furent assassinés.",
+        "series": "Le Peuple de l'air",
+        "volume": 1,
+        "themes": [{"name": "Fées", "up": 120, "down": 2}],
+        "tropes": [{"name": "Ennemis à amants (Enemies to lovers)", "up": 80, "down": 1}]
+      }
+    },
+    {
+      "booknodeId": "07654321",
+      "url": "https://booknode.com/liens_tome_1_07654321",
+      "title": "Liens, Tome 1 : Un lien de fer et de feu",
+      "authors": ["Charly Reinhardt"],
+      "type": "livre",
+      "list": "en_cours",
+      "addedAt": "2025-06-10",
+      "details": null
+    }
+  ]
+}
