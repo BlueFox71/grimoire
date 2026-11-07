@@ -42,6 +42,7 @@ export async function runExport({ previous = null, pause = 1000, fetchDoc = null
   const prevById = new Map(((previous && previous.books) || []).map((b) => [b.booknodeId, b]));
   const books = new Map();
   let listsOk = true;
+  state.total = Object.keys(LISTS).length * Object.keys(TYPES).length;
 
   // 1. Listes (chaque liste × chaque type de publication).
   for (const [listValue, list] of Object.entries(LISTS)) {
