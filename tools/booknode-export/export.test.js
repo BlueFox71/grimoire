@@ -73,3 +73,42 @@ test('a failing list page makes the export incomplete', async () => {
   assert.equal(r.complete, false);
   assert.ok(globalThis.__grimoireExport.errors.length >= 1);
 });
+
+test('an export that collects fewer books than announced is incomplete', async () => {
+  const calls = [];
+  const base = fakeBooknode(calls);
+  const r = await runExport({
+    user: 'Subarashi',
+    pause: 0,
+    fetchDoc: async (url) => {
+      // Booknode annonce 5 livres mais la page n'en montre que 3, et la page 2 est vide.
+      if (url.includes('media_type=book&list=10&')) {
+        return url.includes('&page=1')
+          ? doc(html('library.html').replace('679 résultats', '5 résultats'))
+          : doc('<html><body><div class="small">5 résultats</div></body></html>');
+      }
+      return base(url);
+    },
+  });
+  assert.equal(r.complete, false);
+  assert.ok(globalThis.__grimoireExport.errors.some((e) => e.includes('pal/livre')));
+});
+
+test('pagination follows the books actually received, not only the page size', async () => {
+  const calls = [];
+  const base = fakeBooknode(calls);
+  const r = await runExport({
+    user: 'Subarashi',
+    pause: 0,
+    fetchDoc: async (url) => {
+      // 6 livres annoncés, 3 par page (Booknode plafonne la taille de page) : il faut lire la page 2.
+      if (url.includes('media_type=book&list=10&')) {
+        const page = url.includes('&page=2') ? html('library.html').replace(/_0(\d{7})/g, '_9$1') : html('library.html');
+        return doc(page.replace('679 résultats', '6 résultats'));
+      }
+      return base(url);
+    },
+  });
+  assert.equal(r.complete, true);
+  assert.equal(r.books.length, 6);
+});

@@ -128,4 +128,25 @@ void main() {
     expect(r.merged.lastImportAt, t2);
     expect(a.books['x']!.rating, 1);
   });
+
+  test('phone edits on a local id re-keyed by the pc are forwarded to the new book', () {
+    final pc = Library()
+      ..books['local:x'] = (book('local:x')
+        ..deleted = true
+        ..mergedInto = 'bn:1'
+        ..updatedAt['deleted'] = t2)
+      ..books['bn:1'] = (book('bn:1')..updatedAt['booknode'] = t2);
+    final phone = Library()
+      ..books['local:x'] = (book('local:x')
+        ..rating = 5
+        ..comment = 'top'
+        ..updatedAt['rating'] = t3
+        ..userEditedAt['rating'] = t3
+        ..updatedAt['comment'] = t3);
+    final m = mergeLibraries(pc, phone).merged;
+    expect(m.books['bn:1']!.rating, 5);
+    expect(m.books['bn:1']!.comment, 'top');
+    expect(m.books['bn:1']!.userEditedAt['rating'], t3);
+    expect(m.books['local:x']!.deleted, isTrue);
+  });
 }

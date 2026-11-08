@@ -223,6 +223,7 @@ class _BookScreenState extends State<BookScreen> {
                 maxLines: 6,
                 textInputAction: TextInputAction.done,
                 decoration: const InputDecoration(hintText: 'Ce que tu en as pensé…'),
+                onChanged: (_) => _saveComment(),
                 onSubmitted: (_) => _saveComment(),
               ),
               const SizedBox(height: 28),

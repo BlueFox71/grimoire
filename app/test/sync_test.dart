@@ -74,4 +74,14 @@ void main() {
       throwsA(isA<SyncException>().having((e) => e.message, 'message', contains('PC introuvable'))),
     );
   });
+
+  test('a slow pc merge (over 3 s) still completes', () async {
+    final server = await SyncServer.start(
+      current: () => Library()..books['a'] = book('a'),
+      onMerged: (_) => Future.delayed(const Duration(seconds: 4)),
+    );
+    final out = await syncWithPc(local(server), Library(), 'tel');
+    expect(out.merged.books.keys, ['a']);
+    await server.stop();
+  });
 }

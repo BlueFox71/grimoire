@@ -63,6 +63,7 @@ ImportReport applyExport(Library lib, Map<String, dynamic> export, DateTime now)
         // ce livre sous `local:` ne le fera pas réapparaître à la synchro.
         lib.books[b.id] = b.copy()
           ..deleted = true
+          ..mergedInto = 'bn:$bnId'
           ..updatedAt['deleted'] = now;
         b.id = 'bn:$bnId';
         lib.books[b.id] = b;
@@ -84,7 +85,13 @@ ImportReport applyExport(Library lib, Map<String, dynamic> export, DateTime now)
       b.updatedAt['rating'] = now;
       report.added.add(title);
     }
-    if (b.deleted) continue;
+    if (b.deleted) {
+      // Retiré par Jules : ne revient jamais. Retiré par un import précédent : revient.
+      if (b.userEditedAt['deleted'] != null) continue;
+      b.deleted = false;
+      b.updatedAt['deleted'] = now;
+      report.added.add(title);
+    }
 
     // Données Booknode.
     b.booknodeId = bnId;

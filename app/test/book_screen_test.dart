@@ -121,4 +121,11 @@ void main() {
     expect(c.book('x')!.deleted, isTrue);
     expect(find.text('ouvrir'), findsOneWidget);
   });
+
+  testWidgets('comment is saved while typing, without leaving the field', (tester) async {
+    final c = await openBook(tester);
+    await tester.enterText(find.byKey(const Key('comment')), 'En cours de frappe');
+    await tester.pump(const Duration(seconds: 1));
+    expect(c.book('x')!.comment, 'En cours de frappe');
+  });
 }

@@ -69,6 +69,8 @@ class Book {
   DateTime addedAt;
   String? lastBooknodeList;
   bool deleted = false;
+  /// Sur une pierre tombale `local:` : identifiant `bn:` du livre qui l'a remplacée à l'import.
+  String? mergedInto;
   Map<String, DateTime> updatedAt = {};
   Map<String, DateTime> userEditedAt = {};
 
@@ -97,6 +99,7 @@ class Book {
         'addedAt': _iso(addedAt),
         'lastBooknodeList': lastBooknodeList,
         'deleted': deleted,
+        'mergedInto': mergedInto,
         'updatedAt': _isoMap(updatedAt),
         'userEditedAt': _isoMap(userEditedAt),
       };
@@ -123,6 +126,7 @@ class Book {
         ..readAt = _date(j['readAt'])
         ..lastBooknodeList = j['lastBooknodeList'] as String?
         ..deleted = (j['deleted'] as bool?) ?? false
+        ..mergedInto = j['mergedInto'] as String?
         ..updatedAt = _dateMap(j['updatedAt'])
         ..userEditedAt = _dateMap(j['userEditedAt']);
 }

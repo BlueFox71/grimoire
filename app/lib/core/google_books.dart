@@ -27,7 +27,8 @@ List<BookCandidate> parseGoogleBooks(Map<String, dynamic> json) => [
       for (final item in (json['items'] as List? ?? const []))
         if ((item as Map)['volumeInfo'] case final Map v when v['title'] is String)
           BookCandidate(
-            title: v['subtitle'] is String ? '${v['title']} : ${v['subtitle']}' : v['title'] as String,
+            // Titre nu (sans sous-titre) pour retrouver la fiche Booknode au prochain import.
+            title: v['title'] as String,
             authors: [for (final a in (v['authors'] as List? ?? const [])) a as String],
             summary: v['description'] as String?,
             coverUrl: (v['imageLinks'] as Map?)?['thumbnail'] is String

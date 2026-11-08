@@ -15,7 +15,7 @@ const _groupKeys = <String, List<String>>{
   'rating': ['rating'],
   'comment': ['comment'],
   'tags': ['manualAdded', 'manualRemoved'],
-  'deleted': ['deleted'],
+  'deleted': ['deleted', 'mergedInto'],
   'booknode': [
     'booknodeId', 'url', 'title', 'authors', 'type', 'series', 'volume', 'summary', 'coverUrl', 'tags',
     'lastBooknodeList',
@@ -51,6 +51,42 @@ Book _mergeBook(Book a, Book b) {
   return m;
 }
 
+/// Une pierre tombale `local:` ré-identifiée en `bn:` à l'import peut encore recevoir
+/// des modifications d'un téléphone qui ne connaissait que l'ancien identifiant :
+/// on reporte les groupes plus récents vers le livre `bn:`.
+void _forwardRekeyed(Library merged) {
+  const forwarded = ['status', 'rating', 'comment', 'tags'];
+  for (final src in merged.books.values) {
+    final target = src.mergedInto == null ? null : merged.books[src.mergedInto];
+    if (target == null) continue;
+    final js = src.toJson();
+    final jt = target.toJson();
+    var changed = false;
+    for (final g in forwarded) {
+      final ts = src.updatedAt[g];
+      final tt = target.updatedAt[g];
+      if (ts == null || (tt != null && !ts.isAfter(tt))) continue;
+      for (final k in _groupKeys[g]!) {
+        jt[k] = js[k];
+      }
+      changed = true;
+    }
+    if (!changed) continue;
+    final updated = Book.fromJson(jt)
+      ..updatedAt = {...target.updatedAt}
+      ..userEditedAt = {...target.userEditedAt};
+    for (final g in forwarded) {
+      final ts = src.updatedAt[g];
+      final tt = target.updatedAt[g];
+      if (ts != null && (tt == null || ts.isAfter(tt))) updated.updatedAt[g] = ts;
+      final us = src.userEditedAt[g];
+      final ut = target.userEditedAt[g];
+      if (us != null && (ut == null || us.isAfter(ut))) updated.userEditedAt[g] = us;
+    }
+    merged.books[target.id] = updated;
+  }
+}
+
 /// Fusionne la bibliothèque du PC ([a], gagne les égalités) et celle du téléphone ([b]).
 /// Ne modifie pas les entrées.
 MergeResult mergeLibraries(Library a, Library b) {
@@ -60,8 +96,6 @@ MergeResult mergeLibraries(Library a, Library b) {
       (final x, null) => x,
       (final x?, final y?) => y.isAfter(x) ? y : x,
     };
-  var changedOnA = 0;
-  var changedOnB = 0;
   final ids = {...a.books.keys, ...b.books.keys};
   for (final id in ids) {
     final ba = a.books[id];
@@ -75,7 +109,14 @@ MergeResult mergeLibraries(Library a, Library b) {
       m = _mergeBook(ba, bb);
     }
     merged.books[id] = m;
+  }
+  _forwardRekeyed(merged);
+  var changedOnA = 0;
+  var changedOnB = 0;
+  for (final m in merged.books.values) {
     final enc = jsonEncode(m.toJson());
+    final ba = a.books[m.id];
+    final bb = b.books[m.id];
     if (ba == null || jsonEncode(ba.toJson()) != enc) changedOnA++;
     if (bb == null || jsonEncode(bb.toJson()) != enc) changedOnB++;
   }

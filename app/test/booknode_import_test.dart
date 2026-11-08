@@ -163,7 +163,9 @@ void main() {
   test('deleted book is not resurrected', () {
     final lib = Library();
     applyExport(lib, loadExport(), t0);
-    byTitle(lib, 'Fourth Wing').deleted = true;
+    byTitle(lib, 'Fourth Wing')
+      ..deleted = true
+      ..userEditedAt['deleted'] = t1; // retiré par Jules (bouton « Retirer de Grimoire »)
     final next = loadExport();
     bookEntry(next, 'Fourth Wing')['list'] = 'diamant';
     final r = applyExport(lib, next, t2);
@@ -179,5 +181,26 @@ void main() {
       () => applyExport(Library(), {'format': 'grimoire-booknode-export', 'version': 2, 'books': []}, t0),
       throwsFormatException,
     );
+  });
+
+  test('a book removed by an import comes back when it returns to booknode', () {
+    final lib = Library();
+    applyExport(lib, loadExport(), t0);
+    final without = loadExport();
+    (without['books'] as List).removeWhere((b) => b['title'] == 'Fourth Wing');
+    applyExport(lib, without, t1);
+    expect(byTitle(lib, 'Fourth Wing').deleted, isTrue);
+    final r = applyExport(lib, loadExport(), t2);
+    final fw = byTitle(lib, 'Fourth Wing');
+    expect(fw.deleted, isFalse);
+    expect(fw.updatedAt['deleted'], t2);
+    expect(r.added, contains('Fourth Wing'));
+  });
+
+  test('re-keyed local book tombstone points to its new id', () {
+    final lib = Library();
+    lib.books['local:x'] = Book(id: 'local:x', title: 'Le Prince Cruel', authors: ['Holly Black'], type: 'livre', addedAt: t0);
+    applyExport(lib, loadExport(), t1);
+    expect(lib.books['local:x']!.mergedInto, 'bn:01234567');
   });
 }

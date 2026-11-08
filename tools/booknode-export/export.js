@@ -20,11 +20,37 @@ export function needsDetails(previousBook) {
   return [...(d.themes || []), ...(d.tropes || [])].filter(kept).length < 3;
 }
 
+/**
+ * Pause entre deux requêtes. Dans un onglet en arrière-plan, Chrome ralentit fortement
+ * les setTimeout enchaînés (jusqu'à un réveil par minute) : on minute donc les pauses
+ * dans un Web Worker, qui n'est pas soumis à ce ralentissement.
+ */
+function makeSleep() {
+  if (typeof Worker === 'undefined' || typeof Blob === 'undefined' || typeof URL === 'undefined') {
+    return (ms) => new Promise((r) => setTimeout(r, ms));
+  }
+  const src = 'onmessage = (e) => setTimeout(() => postMessage(e.data.id), e.data.ms);';
+  const worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+  const waiting = new Map();
+  let next = 0;
+  worker.onmessage = (e) => {
+    const resolve = waiting.get(e.data);
+    waiting.delete(e.data);
+    if (resolve) resolve();
+  };
+  return (ms) =>
+    new Promise((resolve) => {
+      const id = next++;
+      waiting.set(id, resolve);
+      worker.postMessage({ id, ms });
+    });
+}
+
 export async function runExport({ previous = null, pause = 1000, fetchDoc = null, user = null } = {}) {
   const state = (globalThis.__grimoireExport = { phase: 'listes', done: 0, total: 0, errors: [], result: null, running: true });
   const who = user || (globalThis.location && (location.pathname.match(/^\/profil\/([^/]+)/) || [])[1]);
   if (!who) throw new Error('Ouvre d\'abord la page de ta bibliothèque Booknode.');
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const sleep = makeSleep();
   const getDoc =
     fetchDoc ||
     (async (url) => {
@@ -41,6 +67,7 @@ export async function runExport({ previous = null, pause = 1000, fetchDoc = null
 
   const prevById = new Map(((previous && previous.books) || []).map((b) => [b.booknodeId, b]));
   const books = new Map();
+  state.books = books; // lisible pendant l'export (reprise possible avec `previous`)
   let listsOk = true;
   state.total = Object.keys(LISTS).length * Object.keys(TYPES).length;
 
@@ -49,18 +76,26 @@ export async function runExport({ previous = null, pause = 1000, fetchDoc = null
     for (const [mediaType, type] of Object.entries(TYPES)) {
       const base = `https://booknode.com/profil/${who}/biblio-table?per_page=${PER_PAGE}&media_type=${mediaType}&list=${listValue}&sort=book_name`;
       try {
+        // On suit les livres réellement reçus : on continue tant qu'il en manque et que la page n'est pas vide.
         let page = 1;
-        let pages = 1;
-        do {
-          const { rows, total } = parseLibraryPage(await politeDoc(`${base}&page=${page}`));
-          pages = Math.max(1, Math.ceil(total / PER_PAGE));
-          for (const r of rows) {
-            if (!books.has(r.booknodeId)) {
-              books.set(r.booknodeId, { ...r, type, list, details: null });
-            }
+        let collected = 0;
+        let announced = 0;
+        let skipped = 0;
+        for (;;) {
+          const res = parseLibraryPage(await politeDoc(`${base}&page=${page}`));
+          announced = Math.max(announced, res.total);
+          skipped += res.skipped || 0;
+          collected += res.rows.length;
+          for (const r of res.rows) {
+            if (!books.has(r.booknodeId)) books.set(r.booknodeId, { ...r, type, list, details: null });
           }
+          if (res.rows.length === 0 || collected + skipped >= announced) break;
           page++;
-        } while (page <= pages);
+        }
+        if (collected < announced) {
+          listsOk = false;
+          state.errors.push(`${list}/${type} : ${collected} livres lus sur ${announced} annoncés`);
+        }
       } catch (e) {
         listsOk = false;
         state.errors.push(`${list}/${type} : ${e.message}`);

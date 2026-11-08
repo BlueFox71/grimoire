@@ -17,12 +17,15 @@ test('frenchDate converts long french dates', () => {
 
 test('booknodeIdFromUrl extracts the trailing digits', () => {
   assert.equal(booknodeIdFromUrl('https://booknode.com/fourth_wing_03477053'), '03477053');
+  assert.equal(booknodeIdFromUrl('https://booknode.com/la_mort_du_roi_tsongor_0695'), '0695');
   assert.equal(booknodeIdFromUrl('https://booknode.com/auteur/x'), null);
+  assert.equal(booknodeIdFromUrl('https://booknode.com/serie/the-empyrean'), null);
 });
 
 test('parseLibraryPage reads rows and total', () => {
-  const { rows, total } = parseLibraryPage(load('library.html'));
+  const { rows, total, skipped } = parseLibraryPage(load('library.html'));
   assert.equal(total, 679);
+  assert.equal(skipped, 0);
   assert.equal(rows.length, 3);
   assert.deepEqual(rows[0], {
     booknodeId: '02702795',
@@ -60,4 +63,14 @@ test('parseThemesPage on a page without sections returns empty lists', () => {
   const { themes, tropes } = parseThemesPage(load('book.html'));
   assert.deepEqual(themes, []);
   assert.deepEqual(tropes, []);
+});
+
+test('parseLibraryPage counts items it could not read', () => {
+  const html = readFileSync(new URL('./fixtures/library.html', import.meta.url), 'utf8').replaceAll(
+    'https://booknode.com/blyd_pearce_02702795',
+    'https://booknode.com/livre-bizarre',
+  );
+  const { rows, skipped } = parseLibraryPage(new DOMParser().parseFromString(html, 'text/html'));
+  assert.equal(rows.length, 2);
+  assert.equal(skipped, 1);
 });

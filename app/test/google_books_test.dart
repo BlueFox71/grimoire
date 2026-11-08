@@ -14,7 +14,7 @@ void main() {
   test('parseGoogleBooks reads title, subtitle, authors and https cover', () {
     final c = parseGoogleBooks(fixture('google_books_prince_cruel.json'));
     expect(c.length, 2);
-    expect(c.first.title, "Le Peuple de l'air : Le Prince cruel");
+    expect(c.first.title, "Le Peuple de l'air", reason: "titre nu, pour retrouver la fiche Booknode à l'import");
     expect(c.first.authors, ['Holly Black']);
     expect(c.first.summary, startsWith('Jude'));
     expect(c.first.coverUrl, startsWith('https://books.google.com/'));

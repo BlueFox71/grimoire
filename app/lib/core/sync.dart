@@ -135,6 +135,14 @@ Future<SyncOutcome> syncWithPc(QrPayload p, Library local, String deviceName, {h
   final c = client ?? http.Client();
   try {
     for (final host in p.hosts) {
+      // Délai court pour trouver le PC, puis délai large pour l'échange lui-même
+      // (~900 livres dans chaque sens, fusion et sauvegarde sur le PC).
+      try {
+        final probe = await Socket.connect(host, p.port, timeout: const Duration(seconds: 3));
+        probe.destroy();
+      } catch (_) {
+        continue;
+      }
       http.Response res;
       try {
         res = await c
@@ -143,9 +151,9 @@ Future<SyncOutcome> syncWithPc(QrPayload p, Library local, String deviceName, {h
               headers: {'X-Grimoire-Key': p.key, 'Content-Type': 'application/json'},
               body: jsonEncode({'deviceName': deviceName, 'library': local.toJson()}),
             )
-            .timeout(const Duration(seconds: 3));
+            .timeout(const Duration(seconds: 120));
       } catch (_) {
-        continue;
+        throw SyncException('Le PC ne répond plus. Relance la synchro sur le PC et réessaie.');
       }
       if (res.statusCode == HttpStatus.gone || res.statusCode == HttpStatus.forbidden) {
         throw SyncException('QR code expiré, relance la synchro sur le PC.');

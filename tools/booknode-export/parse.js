@@ -19,18 +19,23 @@ export function frenchDate(s) {
 
 /** Identifiant Booknode (chiffres finaux de l'URL d'une fiche). */
 export function booknodeIdFromUrl(url) {
-  const m = String(url).split('?')[0].match(/^https?:\/\/booknode\.com\/[a-z0-9_]+_(\d{6,})$/);
-  return m ? m[1] : null;
+  // Une fiche est une page à un seul segment : /<slug>_<chiffres> (les vieux livres ont un identifiant court, ex. _0695).
+  const m = String(url).split(/[?#]/)[0].match(/^https?:\/\/booknode\.com\/([^/]+)_(\d+)$/);
+  return m ? m[2] : null;
 }
 
 /** Page « biblio-table » : lignes de livres + nombre total de résultats. */
 export function parseLibraryPage(doc) {
   const rows = [];
+  let skipped = 0;
   for (const item of doc.querySelectorAll('.book-item')) {
     const link = item.querySelector('.book-name a') || item.querySelector('a.cover-thumbnail');
     const url = link ? link.getAttribute('href').split('?')[0] : null;
     const booknodeId = url ? booknodeIdFromUrl(url) : null;
-    if (!booknodeId) continue;
+    if (!booknodeId) {
+      skipped++;
+      continue;
+    }
     const img = item.querySelector('.book-cover img');
     const thumb = img ? img.getAttribute('data-src') || img.getAttribute('src') : null;
     rows.push({
@@ -42,7 +47,7 @@ export function parseLibraryPage(doc) {
       thumbUrl: thumb ? thumb.split('?')[0] : null,
     });
   }
-  let total = rows.length;
+  let total = rows.length + skipped;
   for (const el of doc.querySelectorAll('div, span, p')) {
     const m = text(el).match(/^(\d[\d\s]*) résultats?$/);
     if (m && el.children.length === 0) {
@@ -50,7 +55,7 @@ export function parseLibraryPage(doc) {
       break;
     }
   }
-  return { rows, total };
+  return { rows, total, skipped };
 }
 
 /** Fiche livre : couverture, résumé, série, tome, type (via JSON-LD schema.org/Book). */

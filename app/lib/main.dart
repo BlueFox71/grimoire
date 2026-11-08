@@ -25,8 +25,39 @@ Future<void> main() async {
   );
 }
 
-class GrimoireApp extends StatelessWidget {
+class GrimoireApp extends StatefulWidget {
   const GrimoireApp({super.key});
+
+  @override
+  State<GrimoireApp> createState() => _GrimoireAppState();
+}
+
+class _GrimoireAppState extends State<GrimoireApp> {
+  // Enregistre tout de suite quand l'appli passe en arrière-plan ou se ferme
+  // (sinon une modification de moins de 500 ms pourrait être perdue).
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onHide: _flush,
+    onPause: _flush,
+    onDetach: _flush,
+    onExitRequested: () async {
+      await _flush();
+      return AppExitResponse.exit;
+    },
+  );
+
+  Future<void> _flush() => context.read<LibraryController>().flush();
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle;
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
