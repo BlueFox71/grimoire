@@ -51,7 +51,7 @@ void main() {
     expect(store.backups, isEmpty);
   });
 
-  testWidgets('booknode section explains the steps and shows the last import', (tester) async {
+  testWidgets('booknode section shows the last import, without step text', (tester) async {
     final lib = Library()..lastImportAt = DateTime.utc(2026, 11, 8, 1, 40);
     lib.books['a'] = book('a');
     lib.books['b'] = book('b', status: ReadStatus.read);
@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(app(c, () async => null));
     expect(find.text('Ma bibliothèque Booknode'), findsOneWidget);
     expect(find.text('Dernier import : 8 novembre 2026 · 1 à lire, 1 lu'), findsOneWidget);
-    expect(find.textContaining('fais un export de ma bibliothèque Booknode'), findsOneWidget);
+    expect(find.textContaining('fais un export'), findsNothing);
   });
 
   testWidgets('without any import the section says so', (tester) async {

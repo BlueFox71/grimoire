@@ -98,14 +98,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text('Ma bibliothèque Booknode', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(_lastImportText(context.watch<LibraryController>().library), style: TextStyle(color: gc.title, fontSize: 13)),
-                const SizedBox(height: 10),
-                Text(
-                  "1. Demande à Claude : « fais un export de ma bibliothèque Booknode ». Il crée un fichier "
-                  "booknode-export-….json dans tes Téléchargements.\n"
-                  "2. Choisis ce fichier ici : Grimoire ajoute tes nouveaux livres et met à jour les autres, "
-                  "sans toucher à tes notes ni à tes avis.",
-                  style: TextStyle(color: gc.muted, height: 1.5),
-                ),
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
