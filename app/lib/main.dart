@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'core/library_controller.dart';
 import 'core/library_store.dart';
 import 'ui/home_screen.dart';
+import 'ui/pinned_tags.dart';
 import 'ui/theme.dart';
 import 'ui/theme_controller.dart';
 
@@ -18,12 +19,14 @@ Future<void> main() async {
   final dir = override != null && override.isNotEmpty ? Directory(override) : await getApplicationSupportDirectory();
   final library = LibraryController(LibraryStore(dir));
   final theme = ThemeController();
-  await Future.wait([library.load(), theme.load()]);
+  final pins = PinnedTags();
+  await Future.wait([library.load(), theme.load(), pins.load()]);
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: library),
         ChangeNotifierProvider.value(value: theme),
+        ChangeNotifierProvider.value(value: pins),
       ],
       child: const GrimoireApp(),
     ),

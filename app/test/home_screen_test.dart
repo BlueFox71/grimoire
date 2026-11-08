@@ -6,6 +6,7 @@ import 'package:grimoire/core/library_controller.dart';
 import 'package:grimoire/core/library_store.dart';
 import 'package:grimoire/core/model.dart';
 import 'package:grimoire/ui/home_screen.dart';
+import 'package:grimoire/ui/pinned_tags.dart';
 import 'package:grimoire/ui/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +21,11 @@ Future<LibraryController> controllerWith(List<Book> books) async {
   return LibraryController(LibraryStore(dir), initial: lib);
 }
 
-Widget app(LibraryController c) => ChangeNotifierProvider.value(
-      value: c,
+Widget app(LibraryController c, {PinnedTags? pins}) => MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: c),
+        ChangeNotifierProvider.value(value: pins ?? PinnedTags()),
+      ],
       child: MaterialApp(theme: grimoireLight(), home: const HomeScreen()),
     );
 
@@ -95,5 +99,36 @@ void main() {
       find.ancestor(of: find.text('Fae'), matching: find.byType(DefaultTextStyle)).first,
     );
     expect(label.style.color, Colors.white);
+  });
+
+  testWidgets('chip row shows 5 themes then Plus, pinned ones first', (tester) async {
+    final many = [
+      for (var i = 0; i < 8; i++)
+        book('x$i', title: 'Livre $i', tags: [for (var j = 0; j <= i; j++) theme('T$j')]),
+    ];
+    final pins = PinnedTags()..pinned = ['T7'];
+    await tester.pumpWidget(app(await controllerWith(many), pins: pins));
+    final chips = tester.widgetList<FilterChip>(find.byType(FilterChip)).map((c) => (c.label as Text).data).toList();
+    expect(chips, ['T7', 'T0', 'T1', 'T2', 'T3']);
+    expect(find.widgetWithText(ActionChip, 'Plus'), findsOneWidget);
+  });
+
+  testWidgets('a selected theme outside the 5 stays visible in the row', (tester) async {
+    final many = [
+      for (var i = 0; i < 8; i++)
+        book('x$i', title: 'Livre $i', tags: [for (var j = 0; j <= i; j++) theme('T$j')]),
+    ];
+    await tester.pumpWidget(app(await controllerWith(many)));
+    await tester.tap(find.widgetWithText(ActionChip, 'Plus'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'T6');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(CheckboxListTile, 'T6'));
+    await tester.pump();
+    await tester.tap(find.text('Appliquer'));
+    await tester.pumpAndSettle();
+    final chips = tester.widgetList<FilterChip>(find.byType(FilterChip)).map((c) => (c.label as Text).data).toList();
+    expect(chips.first, 'T6');
+    expect(chips.length, 6);
   });
 }

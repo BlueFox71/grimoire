@@ -8,13 +8,14 @@ import '../core/tags.dart';
 import 'add_book_screen.dart';
 import 'book_screen.dart';
 import 'cover.dart';
+import 'pinned_tags.dart';
 import 'settings_screen.dart';
 import 'sync_screen.dart';
 import 'tag_picker.dart';
 import 'theme.dart';
 
-/// Nombre de pastilles de filtre affichées avant « Plus ».
-const visibleChips = 16;
+/// Nombre de pastilles de thème affichées avant « Plus » (thèmes épinglés d'abord).
+const visibleChips = 5;
 
 String stars(int rating) => '★' * rating;
 
@@ -54,9 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final lib = context.watch<LibraryController>().library;
     final books = filterBooks(lib.books.values, _filter);
     final counts = chipCounts(lib.books.values, _filter.status);
+    final pinned = context.watch<PinnedTags>().pinned;
+    final base = <String>[
+      ...pinned,
+      ...counts.map((e) => e.key).where((n) => !pinned.contains(n)),
+    ].take(visibleChips).toList();
+    // Un filtre coché hors des 5 reste visible (en tête), pour pouvoir le décocher.
     final chipNames = <String>[
-      ..._filter.tags,
-      ...counts.map((e) => e.key).where((n) => !_filter.tags.contains(n)).take(visibleChips),
+      ..._filter.tags.where((t) => !base.contains(t)),
+      ...base,
     ];
     final gc = context.gc;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
