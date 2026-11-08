@@ -13,6 +13,8 @@ test('frenchDate converts long french dates', () => {
   assert.equal(frenchDate('22 janvier 2022'), '2022-01-22');
   assert.equal(frenchDate('1er août 2020'), '2020-08-01');
   assert.equal(frenchDate('n’importe quoi'), null);
+  // Dans le HTML brut (avant moment.js), la date est au format AAAA-MM-JJ HH:MM:SS.
+  assert.equal(frenchDate('\n   2022-01-22 21:19:42\n  '), '2022-01-22');
 });
 
 test('booknodeIdFromUrl extracts the trailing digits', () => {

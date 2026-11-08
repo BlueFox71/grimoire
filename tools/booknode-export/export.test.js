@@ -24,6 +24,9 @@ test('needsDetails is true for unknown or poorly tagged books', () => {
   assert.equal(needsDetails(undefined), true);
   assert.equal(needsDetails({ details: null }), true);
   assert.equal(needsDetails({ details: { themes: [{ name: 'A', up: 9, down: 0 }], tropes: [] } }), true);
+  // Thèmes non contestés, même peu votés : le livre n'est pas « à compléter ».
+  const lowVotes = { details: { themes: [1, 2, 3].map((i) => ({ name: `T${i}`, up: 1, down: 0 })), tropes: [] } };
+  assert.equal(needsDetails(lowVotes), false);
   const full = { details: { themes: [1, 2, 3].map((i) => ({ name: `T${i}`, up: 9, down: 0 })), tropes: [] } };
   assert.equal(needsDetails(full), false);
 });

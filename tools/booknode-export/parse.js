@@ -10,8 +10,10 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
 const digits = (s) => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
 const pad = (n) => String(n).padStart(2, '0');
 
-/** « 19 décembre 2025 » → « 2025-12-19 » (null si illisible). */
+/** « 19 décembre 2025 » ou « 2025-12-19 21:19:42 » (HTML brut) → « 2025-12-19 » (null si illisible). */
 export function frenchDate(s) {
+  const iso = String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
   const m = String(s).trim().toLowerCase().match(/^(\d{1,2})(?:er)?\s+([a-zéû]+)\s+(\d{4})$/);
   if (!m || !MONTHS[m[2]]) return null;
   return `${m[3]}-${pad(MONTHS[m[2]])}-${pad(parseInt(m[1], 10))}`;

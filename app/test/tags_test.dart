@@ -7,9 +7,14 @@ void main() {
   test('isKept applies the vote rule', () {
     expect(isKept(theme('Young Adult', 27, 16)), isFalse);
     expect(isKept(theme('Dragons', 171, 1)), isTrue);
-    expect(isKept(theme('X', 2, 0)), isFalse);
     expect(isKept(theme('X', 3, 0)), isTrue);
     expect(isKept(theme('X', 6, 3)), isTrue);
+    // Livres peu lus : un thème que personne ne conteste est gardé, même avec 0 à 2 votes.
+    expect(isKept(theme('Romance M/M', 1, 0)), isTrue);
+    expect(isKept(theme('Romance', 0, 0)), isTrue);
+    // Contesté : il faut au moins 3 votes pour et deux fois plus de pour que de contre.
+    expect(isKept(theme('X', 2, 1)), isFalse);
+    expect(isKept(theme('X', 5, 3)), isFalse);
   });
 
   test('displayTags respects manual edits', () {

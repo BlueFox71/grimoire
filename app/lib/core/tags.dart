@@ -1,13 +1,15 @@
 import 'model.dart';
 
-/// Un thème ou trope Booknode est retenu si les lecteurs votent nettement pour.
+/// Un thème ou trope Booknode est retenu si personne ne le conteste, ou, s'il est contesté,
+/// si les lecteurs votent nettement pour (au moins 3 pour, et deux fois plus de pour que de contre).
+/// Beaucoup de livres peu lus n'ont que 0 à 2 votes par thème : on les garde tant qu'il n'y a pas de contre.
 const minUpVotes = 3;
 const upToDownRatio = 2;
 
 /// En dessous de ce nombre d'étiquettes affichées, le livre est « à compléter ».
 const minDisplayedTags = 3;
 
-bool isKept(Tag t) => t.up >= minUpVotes && t.up >= upToDownRatio * t.down;
+bool isKept(Tag t) => t.down == 0 || (t.up >= minUpVotes && t.up >= upToDownRatio * t.down);
 
 /// Étiquettes affichées : retenues, moins les retirées par Jules, plus ses ajouts.
 /// Thèmes avant tropes, puis votes décroissants.

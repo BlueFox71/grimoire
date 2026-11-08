@@ -11,7 +11,8 @@ export const LISTS = { 10: 'pal', 8: 'en_cours', 1: 'diamant', 2: 'or', 3: 'arge
 export const TYPES = { book: 'livre', manga: 'manga', graphic_novel: 'bd', webtoon: 'webtoon' };
 export const PER_PAGE = 250;
 
-const kept = (t) => t.up >= 3 && t.up >= 2 * t.down;
+// Même règle que l'appli (app/lib/core/tags.dart) : non contesté, ou au moins 3 pour et 2× plus de pour que de contre.
+const kept = (t) => t.down === 0 || (t.up >= 3 && t.up >= 2 * t.down);
 
 /** Faut-il relire la fiche et les thèmes de ce livre ? (absent de l'export précédent, ou « à compléter ») */
 export function needsDetails(previousBook) {
