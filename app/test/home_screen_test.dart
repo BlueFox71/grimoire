@@ -71,4 +71,14 @@ void main() {
     await tester.pumpWidget(app(await controllerWith(books)));
     expect(find.text('à compléter'), findsNWidgets(2));
   });
+
+  testWidgets('selected chip label is light on the accent colour (readable)', (tester) async {
+    await tester.pumpWidget(app(await controllerWith(books)));
+    await tester.tap(find.widgetWithText(FilterChip, 'Fae'));
+    await tester.pump();
+    final label = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('Fae'), matching: find.byType(DefaultTextStyle)).first,
+    );
+    expect(label.style.color, Colors.white);
+  });
 }

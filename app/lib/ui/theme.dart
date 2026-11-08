@@ -99,7 +99,12 @@ ThemeData _build({
     chipTheme: ChipThemeData(
       backgroundColor: surface,
       selectedColor: accent,
-      labelStyle: TextStyle(fontFamily: bodyFont, color: text, fontSize: 13),
+      // Texte clair sur la puce sélectionnée (fond accent), sinon couleur du texte.
+      labelStyle: TextStyle(
+        fontFamily: bodyFont,
+        fontSize: 13,
+        color: WidgetStateColor.resolveWith((s) => s.contains(WidgetState.selected) ? onAccent : text),
+      ),
       secondaryLabelStyle: TextStyle(fontFamily: bodyFont, color: onAccent, fontSize: 13),
       checkmarkColor: onAccent,
       side: BorderSide.none,

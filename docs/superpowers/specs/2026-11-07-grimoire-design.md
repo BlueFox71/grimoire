@@ -26,7 +26,7 @@ Grimoire est une appli perso : sa PAL avec des **filtres par thème et par trope
    - **jamais importées : Mes envies, Poubelle** [Jules] ;
    - types de publication : tous (livres, mangas, webtoons, BD) tant qu'ils sont dans les listes ci-dessus [choix Claude] ;
    - pour chaque livre : titre, auteur(s), couverture, résumé, série et numéro de tome, lien Booknode, et la page **« Thèmes et Tropes »** (`https://booknode.com/<slug>_<id>/themes`) ;
-   - on garde un thème ou un trope seulement si les lecteurs votent nettement pour : votes pour ≥ 2 × votes contre et votes pour ≥ 3 [choix Claude ; seuils réglables dans le code]. Exemple : « Young Adult » sur Fourth Wing (27 pour / 16 contre) est écarté ;
+   - on garde un thème ou un trope si personne ne le conteste (0 vote contre), ou s'il a au moins 3 votes pour et deux fois plus de pour que de contre [choix Claude, assoupli le 2026-11-08 après avoir vu les vraies données : beaucoup de livres peu lus n'ont que 0 à 2 votes par thème]. Exemple : « Young Adult » sur Fourth Wing (27 pour / 16 contre) est écarté ;
    - un livre avec moins de 3 thèmes retenus est marqué « à compléter » ; Jules complète à la main depuis la fiche [choix Claude ; une complétion automatique à partir du résumé est hors périmètre de la v1] ;
    - l'import peut être **relancé** (nouvel export, puis « Importer un export Booknode »). Jules **continue d'utiliser Booknode ET Grimoire** [Jules], donc le réimport reprend les changements faits sur Booknode depuis le dernier import, selon ces règles [choix Claude] :
      - Grimoire mémorise, pour chaque livre, la **liste Booknode vue au dernier import** (PAL, Diamant, Or…) ;

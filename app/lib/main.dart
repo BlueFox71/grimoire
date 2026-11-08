@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter/material.dart';
@@ -12,7 +13,9 @@ import 'ui/theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationSupportDirectory();
+  // GRIMOIRE_DATA permet d'ouvrir une autre bibliothèque (aperçu, essais) sans toucher à la vraie.
+  final override = Platform.environment['GRIMOIRE_DATA'];
+  final dir = override != null && override.isNotEmpty ? Directory(override) : await getApplicationSupportDirectory();
   final library = LibraryController(LibraryStore(dir));
   final theme = ThemeController();
   await Future.wait([library.load(), theme.load()]);
