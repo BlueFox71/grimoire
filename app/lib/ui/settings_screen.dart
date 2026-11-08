@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../core/booknode_import.dart';
 import '../core/library_controller.dart';
+import '../core/model.dart';
 import 'theme.dart';
 import 'theme_controller.dart';
 
@@ -14,6 +15,18 @@ import 'theme_controller.dart';
 Future<String?> pickJsonFile() async {
   final f = await openFile(acceptedTypeGroups: const [XTypeGroup(label: 'Export Booknode', extensions: ['json'])]);
   return f == null ? null : utf8.decode(await f.readAsBytes());
+}
+
+const _months = [
+  'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+];
+
+String _lastImportText(Library lib) {
+  final d = lib.lastImportAt?.toLocal();
+  if (d == null) return "Aucun import pour l'instant";
+  final toRead = lib.visible.where((b) => b.status == ReadStatus.toRead).length;
+  final read = lib.visible.where((b) => b.status == ReadStatus.read).length;
+  return 'Dernier import : ${d.day} ${_months[d.month - 1]} ${d.year} · $toRead à lire, $read lu${read > 1 ? 's' : ''}';
 }
 
 class SettingsScreen extends StatefulWidget {
@@ -82,19 +95,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               if (showImport) ...[
                 const SizedBox(height: 28),
-                Text('Booknode', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 6),
-                Text(
-                  "Demande à Claude un export de ta bibliothèque Booknode, puis choisis le fichier booknode-export.json.",
-                  style: TextStyle(color: gc.muted),
-                ),
+                Text('Ma bibliothèque Booknode', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text(_lastImportText(context.watch<LibraryController>().library), style: TextStyle(color: gc.title, fontSize: 13)),
                 const SizedBox(height: 10),
+                Text(
+                  "1. Demande à Claude : « fais un export de ma bibliothèque Booknode ». Il crée un fichier "
+                  "booknode-export-….json dans tes Téléchargements.\n"
+                  "2. Choisis ce fichier ici : Grimoire ajoute tes nouveaux livres et met à jour les autres, "
+                  "sans toucher à tes notes ni à tes avis.",
+                  style: TextStyle(color: gc.muted, height: 1.5),
+                ),
+                const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: FilledButton.icon(
                     onPressed: _busy ? null : _import,
                     icon: const Icon(Icons.file_open_outlined),
-                    label: const Text('Importer un export Booknode'),
+                    label: const Text("Choisir le fichier d'export…"),
                   ),
                 ),
                 if (_busy) const Padding(padding: EdgeInsets.only(top: 12), child: LinearProgressIndicator()),
