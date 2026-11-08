@@ -12,7 +12,7 @@ $version = (Select-String -Path "$app\pubspec.yaml" -Pattern '^version:\s*([0-9.
 Push-Location $app
 try {
     $ErrorActionPreference = 'Continue'  # Flutter écrit sa progression sur stderr
-    flutter build apk --release --split-per-abi
+    flutter build apk --release --split-per-abi --no-tree-shake-icons  # l'optimisation des icônes en retire qui sont utilisées (Flutter 3.47)
     if ($LASTEXITCODE -ne 0) { throw "La fabrication de l'APK a échoué." }
 } finally { Pop-Location }
 

@@ -8,7 +8,7 @@ $version = (Select-String -Path "$app\pubspec.yaml" -Pattern '^version:\s*([0-9.
 Push-Location $app
 try {
     $ErrorActionPreference = 'Continue'  # Flutter écrit sa progression sur stderr
-    flutter build windows --release
+    flutter build windows --release --no-tree-shake-icons  # idem Android
     if ($LASTEXITCODE -ne 0) { throw "La fabrication de la version Windows a échoué." }
 } finally { Pop-Location }
 

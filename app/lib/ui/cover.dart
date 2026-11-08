@@ -8,7 +8,8 @@ import 'theme.dart';
 class Cover extends StatelessWidget {
   final Book book;
   final double width;
-  const Cover(this.book, {super.key, this.width = 44});
+  final double? radius;
+  const Cover(this.book, {super.key, this.width = 44, this.radius});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class Cover extends StatelessWidget {
     final placeholder = _Placeholder(book: book, width: width, height: height);
     final url = book.coverUrl;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(width / 12),
+      borderRadius: BorderRadius.circular(radius ?? width / 12),
       child: SizedBox(
         width: width,
         height: height,

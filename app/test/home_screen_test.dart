@@ -32,11 +32,23 @@ void main() {
     book('c', title: 'Dracula', authors: ['Bram Stoker'], tags: [theme('Vampires')], status: ReadStatus.read, rating: 4),
   ];
 
-  testWidgets('shows to-read books and count', (tester) async {
+  testWidgets('shows to-read books as a cover grid with count', (tester) async {
     await tester.pumpWidget(app(await controllerWith(books)));
-    expect(find.text('2 livres correspondent'), findsOneWidget);
-    expect(find.text('Fourth Wing'), findsOneWidget);
+    expect(find.text('Ma pile'), findsOneWidget);
+    expect(find.text('2 livres'), findsOneWidget);
+    expect(find.byKey(const Key('cover-grid')), findsOneWidget);
+    expect(find.text('Fourth Wing'), findsWidgets);
     expect(find.text('Dracula'), findsNothing);
+  });
+
+  testWidgets('floating navigation switches between pile, reading and read', (tester) async {
+    await tester.pumpWidget(app(await controllerWith(books)));
+    for (final label in ['Pile', 'En cours', 'Lus', 'Synchro']) {
+      expect(find.descendant(of: find.byKey(const Key('nav')), matching: find.text(label)), findsOneWidget);
+    }
+    await tester.tap(find.descendant(of: find.byKey(const Key('nav')), matching: find.text('En cours')));
+    await tester.pump();
+    expect(find.text('0 livre'), findsOneWidget);
   });
 
   testWidgets('tapping two chips keeps books having both', (tester) async {
@@ -45,8 +57,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(FilterChip, 'Fae'));
     await tester.pump();
-    expect(find.text('1 livre correspond'), findsOneWidget);
-    expect(find.text('Fourth Wing'), findsOneWidget);
+    expect(find.text('1 livre'), findsOneWidget);
+    expect(find.text('Fourth Wing'), findsWidgets);
     expect(find.text('Le Prince Cruel'), findsNothing);
   });
 
@@ -54,22 +66,25 @@ void main() {
     await tester.pumpWidget(app(await controllerWith(books)));
     await tester.enterText(find.byType(TextField), 'holly');
     await tester.pump();
-    expect(find.text('Le Prince Cruel'), findsOneWidget);
+    expect(find.text('Le Prince Cruel'), findsWidgets);
     expect(find.text('Fourth Wing'), findsNothing);
   });
 
   testWidgets('status Lus shows read books with stars', (tester) async {
     await tester.pumpWidget(app(await controllerWith(books)));
-    await tester.tap(find.text('Lus'));
+    await tester.tap(find.descendant(of: find.byKey(const Key('nav')), matching: find.text('Lus')));
     await tester.pump();
-    expect(find.text('Dracula'), findsOneWidget);
-    expect(find.text('★★★★☆'), findsOneWidget);
+    expect(find.text('Mes lectures'), findsOneWidget);
+    expect(find.text('Dracula'), findsWidgets);
+    expect(find.text('★★★★'), findsOneWidget);
     expect(find.text('Fourth Wing'), findsNothing);
   });
 
   testWidgets('books with few tags show the à compléter badge', (tester) async {
+    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(app(await controllerWith(books)));
-    expect(find.text('à compléter'), findsNWidgets(2));
+    expect(find.bySemanticsLabel(RegExp('à compléter')), findsNWidgets(2));
+    semantics.dispose();
   });
 
   testWidgets('selected chip label is light on the accent colour (readable)', (tester) async {
