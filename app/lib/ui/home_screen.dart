@@ -14,7 +14,7 @@ import 'sync_screen.dart';
 import 'tag_picker.dart';
 import 'theme.dart';
 
-/// Nombre de pastilles de thème affichées avant « Plus » (thèmes épinglés d'abord).
+/// Nombre maximal de pastilles de thème avant « Plus » (les épinglés, ou à défaut les plus fréquents).
 const visibleChips = 5;
 
 String stars(int rating) => '★' * rating;
@@ -56,10 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final books = filterBooks(lib.books.values, _filter);
     final counts = chipCounts(lib.books.values, _filter.status);
     final pinned = context.watch<PinnedTags>().pinned;
-    final base = <String>[
-      ...pinned,
-      ...counts.map((e) => e.key).where((n) => !pinned.contains(n)),
-    ].take(visibleChips).toList();
+    // Thèmes épinglés seulement (5 au plus) ; sans épingle, les 5 plus fréquents.
+    final base = pinned.isNotEmpty
+        ? pinned.take(visibleChips).toList()
+        : counts.map((e) => e.key).take(visibleChips).toList();
     // Un filtre coché hors des 5 reste visible (en tête), pour pouvoir le décocher.
     final chipNames = <String>[
       ..._filter.tags.where((t) => !base.contains(t)),

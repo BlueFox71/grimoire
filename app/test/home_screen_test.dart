@@ -101,16 +101,26 @@ void main() {
     expect(label.style.color, Colors.white);
   });
 
-  testWidgets('chip row shows 5 themes then Plus, pinned ones first', (tester) async {
+  testWidgets('with pinned themes, the row shows only them, then Plus', (tester) async {
     final many = [
       for (var i = 0; i < 8; i++)
         book('x$i', title: 'Livre $i', tags: [for (var j = 0; j <= i; j++) theme('T$j')]),
     ];
-    final pins = PinnedTags()..pinned = ['T7'];
+    final pins = PinnedTags()..pinned = ['T7', 'T2'];
     await tester.pumpWidget(app(await controllerWith(many), pins: pins));
     final chips = tester.widgetList<FilterChip>(find.byType(FilterChip)).map((c) => (c.label as Text).data).toList();
-    expect(chips, ['T7', 'T0', 'T1', 'T2', 'T3']);
+    expect(chips, ['T7', 'T2']);
     expect(find.widgetWithText(ActionChip, 'Plus'), findsOneWidget);
+  });
+
+  testWidgets('without pinned themes, the row shows the 5 most frequent', (tester) async {
+    final many = [
+      for (var i = 0; i < 8; i++)
+        book('x$i', title: 'Livre $i', tags: [for (var j = 0; j <= i; j++) theme('T$j')]),
+    ];
+    await tester.pumpWidget(app(await controllerWith(many)));
+    final chips = tester.widgetList<FilterChip>(find.byType(FilterChip)).map((c) => (c.label as Text).data).toList();
+    expect(chips, ['T0', 'T1', 'T2', 'T3', 'T4']);
   });
 
   testWidgets('a selected theme outside the 5 stays visible in the row', (tester) async {
